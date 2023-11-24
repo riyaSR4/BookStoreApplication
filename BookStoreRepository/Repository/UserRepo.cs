@@ -1,4 +1,5 @@
 ﻿using BookStoreCommon.User;
+using BookStoreCommon.UserRegister;
 using BookStoreRepository.IRepository;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -17,22 +18,29 @@ namespace BookStoreRepository.Repository
     public class UserRepo : IUserRepo
     {
         private readonly IConfiguration iconfiguration;
+        public UserRepo(IConfiguration iconfiguration)
+        {
+            this.iconfiguration = iconfiguration;
+        }
         private SqlConnection con;
+        
         private void Connection()
         {
-            string connectionStr = "data source = (localdb)\\MSSQLLocalDB; initial catalog = BookStoreApp; integrated security = true";
+            string connectionStr = this.iconfiguration[("ConnectionStrings:UserDbConnection")];
             con = new SqlConnection(connectionStr);
         }
         public async Task<int> UserRegistration(UserRegister obj)
         {
+            var password = EncryptPassword(obj.Password);
+            obj.Password = password;
             try
             {
                 Connection();
-                SqlCommand com = new SqlCommand("UserRegistration", con);
+                SqlCommand com = new SqlCommand("spUserRegistration", con);
                 com.CommandType = CommandType.StoredProcedure;
                 com.Parameters.AddWithValue("@FullName", obj.FullName);
                 com.Parameters.AddWithValue("@EmailId", obj.EmailId);
-                com.Parameters.AddWithValue("@Password", obj.Password);
+                com.Parameters.AddWithValue("@password", password);
                 com.Parameters.AddWithValue("@MobileNumber", obj.MobileNumber);
                 con.Open();
                 int result = await com.ExecuteNonQueryAsync();
@@ -64,18 +72,19 @@ namespace BookStoreRepository.Repository
             {
                 throw;
             }
-            
-
+            finally
+            {
+                con.Close();
+            }
         }
         public UserRegister GetUser(string email)
         {
             var obj = new UserRegister();
             Connection();
             con.Open();
-            SqlCommand com = new SqlCommand("GetUser", con);
+            SqlCommand com = new SqlCommand("spGetUser", con);
             com.CommandType = CommandType.StoredProcedure;
             com.Parameters.AddWithValue("@EmailId", email);
-            //SqlDataAdapter da = new SqlDataAdapter(com);
             SqlDataReader reader = com.ExecuteReader();
 
             if (reader.Read())
@@ -85,14 +94,70 @@ namespace BookStoreRepository.Repository
                     UserId = (int)reader["UserId"],
                     FullName = (string)reader["FullName"],
                     EmailId = (string)reader["EmailId"],
-                    Password = (string)reader["password"],
-                    MobileNumber = (int)reader["MobileNumber"]
+                    Password = (string)reader["Password"],
+                    MobileNumber = (string)reader["MobileNumber"]
                 };
             }
             con.Close();
             return obj;
 
         }
+        public string ForgetPassword(string email)
+        {
+            try
+            {
+                var emailcheck = GetUser(email);
+                if (emailcheck != null)
+                {
+                    var token = GenerateSecurityToken(emailcheck.EmailId, emailcheck.UserId);
+                    MSMQ msmq = new MSMQ();
+                    msmq.sendData2Queue(token, email);
+                    return token;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public UserRegister ResetPassword(string email, string newpassword, string confirmpassword)
+        {
+            var userregister = GetUser(email);
+            if (newpassword.Equals(confirmpassword))
+            {
+                var input = userregister;
+                var password = EncryptPassword(newpassword);
+                input.Password = password;
+                if (input != null)
+                {
+                    Connection();
+                    SqlCommand com = new SqlCommand("spResetPassword", con);
+                    com.CommandType = CommandType.StoredProcedure;
+                    com.Parameters.AddWithValue("@FullName", input.FullName);
+                    com.Parameters.AddWithValue("@EmailId", input.EmailId);
+                    com.Parameters.AddWithValue("@password", password);
+                    com.Parameters.AddWithValue("@MobileNumber", input.MobileNumber);
+                    con.Open();
+                    int i = com.ExecuteNonQuery();
+                    con.Close();
+                    if (i != 0)
+                    {
+                        return input;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                return null;
+            }
+            return null;
+        }
+
         public string GenerateSecurityToken(string email, int userId)
         {
             var tokenhandler = new JwtSecurityTokenHandler();

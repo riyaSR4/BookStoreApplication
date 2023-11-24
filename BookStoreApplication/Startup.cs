@@ -37,6 +37,8 @@ namespace BookStoreApplication
             services.AddControllers();
             services.AddScoped<IUserRepo, UserRepo>();
             services.AddScoped<IUserBusiness, UserBusiness>();
+            services.AddScoped<IBookRepo, BookRepo>();
+            services.AddScoped<IBookBusiness, BookBusiness>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo

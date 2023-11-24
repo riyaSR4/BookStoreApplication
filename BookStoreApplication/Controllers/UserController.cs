@@ -6,6 +6,8 @@ using BookStoreBusiness.IBusiness;
 using BookStoreCommon.User;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace BookStoreApplication.Controllers
 {
@@ -57,6 +59,44 @@ namespace BookStoreApplication.Controllers
             catch (Exception ex)
             {
                 return this.NotFound(new { StatusCode = this.BadRequest(), Status = false, Message = ex.Message });
+            }
+        }
+        [HttpPost]
+        [Route("ForgetPassword")]
+        public ActionResult ForgetPassword(string email)
+        {
+            try
+            {
+                var result = this.userBusiness.ForgetPassword(email);
+                if (result != null)
+                {
+                    return this.Ok(new { Status = true, Message = "Reset Email Send" });
+                }
+                return this.BadRequest(new { Status = false, Message = "Reset UnSuccessful" });
+            }
+            catch (Exception ex)
+            {
+                return this.NotFound(new { StatusCode = this.BadRequest(), Status = false, Message = ex.Message });
+            }
+        }
+        [Authorize]
+        [HttpPut]
+        [Route("ResetPassword")]
+        public ActionResult ResetPassword(string newpassword, string confirmpassword)
+        {
+            try
+            {
+                var email = User.FindFirst(ClaimTypes.Email).Value.ToString();
+                var result = this.userBusiness.ResetPassword(email,newpassword, confirmpassword);
+                if (result != null)
+                {
+                    return this.Ok(new { Status = true, Message = "User Password Reset Successful", Data = result });
+                }
+                return this.BadRequest(new { Status = false, Message = "User Password Reset Unsuccessful" });
+            }
+            catch (Exception ex)
+            {
+                return this.NotFound(new { Status = false, Message = ex.Message });
             }
         }
     }
