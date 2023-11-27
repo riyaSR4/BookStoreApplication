@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using BookStoreCommon.Book;
 using BookStoreRepository.IRepository;
+using System.Net;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
+using Microsoft.AspNetCore.Http;
 
 namespace BookStoreRepository.Repository
 {
@@ -24,7 +28,7 @@ namespace BookStoreRepository.Repository
             string connectionStr = this.iconfiguration[("ConnectionStrings:UserDbConnection")];
             con = new SqlConnection(connectionStr);
         }
-        public async Task<int> AddBook(Book obj)
+        public async Task<int> AddBook(Books obj)
         {
             try
             {
@@ -51,10 +55,10 @@ namespace BookStoreRepository.Repository
                 con.Close();
             }
         }
-        public IEnumerable<Book> GetAllBooks()
+        public IEnumerable<Books> GetAllBooks()
         {
             Connection();
-            List<Book> BookList = new List<Book>();
+            List<Books> BookList = new List<Books>();
             SqlCommand com = new SqlCommand("spGetAllBooks", con);
             com.CommandType = CommandType.StoredProcedure;
             SqlDataAdapter da = new SqlDataAdapter(com);
@@ -66,7 +70,7 @@ namespace BookStoreRepository.Repository
             foreach (DataRow dr in dt.Rows)
             {
                 BookList.Add(
-                    new Book()
+                    new Books()
                     {
                         BookId = Convert.ToInt32(dr["BookId"]),
                         BookName = Convert.ToString(dr["BookName"]),
@@ -85,7 +89,7 @@ namespace BookStoreRepository.Repository
             }
             return BookList;
         }
-        public bool UpdateBook(Book obj)
+        public bool UpdateBook(Books obj)
         {
             Connection();
             SqlCommand com = new SqlCommand("spUpdateBook", con);
@@ -115,7 +119,7 @@ namespace BookStoreRepository.Repository
             try
             {
                 Connection();
-                SqlCommand com = new SqlCommand("spDeleteEmployee", con);
+                SqlCommand com = new SqlCommand("spDeleteBook", con);
                 com.CommandType = CommandType.StoredProcedure;
                 com.Parameters.AddWithValue("@BookId", BookId);
                 con.Open();
@@ -137,6 +141,54 @@ namespace BookStoreRepository.Repository
             finally
             {
                 con.Close();
+            }
+        }
+        public bool Image(IFormFile file, int BookId)
+        {
+            try
+            {
+                if (file == null)
+                {
+                    return false;
+                }
+                var stream = file.OpenReadStream();
+                var name = file.FileName;
+                Account account = new Account(
+                     "dzpesfhyv",
+                     "383472912723393",
+                     "A64zmnU-bBchnSNURq3tDo7zBXE");
+
+                Cloudinary cloudinary = new Cloudinary(account);
+                var uploadParams = new ImageUploadParams()
+                {
+                    File = new FileDescription(name, stream)
+                };
+                ImageUploadResult uploadResult = cloudinary.Upload(uploadParams);
+                cloudinary.Api.UrlImgUp.BuildUrl(String.Format("{0}.{1}", uploadResult.PublicId, uploadResult.Format));
+                var cloudinaryfilelink = uploadResult.Uri.ToString();
+                Link(cloudinaryfilelink, BookId);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+        public void Link(string cloudinaryfilelink, int BookId)
+        {
+            try
+            {
+                Connection();
+                SqlCommand com = new SqlCommand("spUploadImage", con);
+                com.CommandType = CommandType.StoredProcedure;
+                com.Parameters.AddWithValue("@BookId", BookId);
+                com.Parameters.AddWithValue("@fileLink", cloudinaryfilelink);
+                con.Open();
+                var i = com.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
         }
 

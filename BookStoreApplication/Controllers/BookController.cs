@@ -23,7 +23,7 @@ namespace BookStoreApplication.Controllers
 
         [HttpPost]
         [Route("AddBook")]
-        public async Task<ActionResult> AddBook(Book book)
+        public async Task<ActionResult> AddBook(Books book)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace BookStoreApplication.Controllers
         }
         [HttpPut]
         [Route("UpdateBook")]
-        public ActionResult UpdateBook(Book book)
+        public ActionResult UpdateBook(Books book)
         {
             try
             {
@@ -87,6 +87,24 @@ namespace BookStoreApplication.Controllers
                     return this.Ok(new { Status = true, Message = "Book Deleted Successfully" });
                 }
                 return this.BadRequest(new { Status = false, Message = "Deleting Book Unsuccessful" });
+            }
+            catch (Exception ex)
+            {
+                return this.NotFound(new { Status = false, Message = ex.Message });
+            }
+        }
+        [HttpPost]
+        [Route("UploadImage")]
+        public ActionResult Image(IFormFile file, int BookId)
+        {
+            try
+            {
+                var result = this.bookBusiness.Image(file, BookId);
+                if (result)
+                {
+                    return this.Ok(new { Status = true, Message = "Image Uploaded Successfully", data = result });
+                }
+                return this.BadRequest(new { Status = false, Message = "Uploading Image Unsuccessful" });
             }
             catch (Exception ex)
             {

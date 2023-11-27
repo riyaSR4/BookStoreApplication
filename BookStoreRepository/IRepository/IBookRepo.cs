@@ -1,4 +1,5 @@
 ﻿using BookStoreCommon.Book;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,9 +9,10 @@ namespace BookStoreRepository.IRepository
 {
     public interface IBookRepo
     {
-        public Task<int> AddBook(Book obj);
-        public IEnumerable<Book> GetAllBooks();
-        public bool UpdateBook(Book obj);
+        public Task<int> AddBook(Books obj);
+        public IEnumerable<Books> GetAllBooks();
+        public bool UpdateBook(Books obj);
         public bool DeleteBook(int BookId);
+        public bool Image(IFormFile file, int BookId);
     }
 }
