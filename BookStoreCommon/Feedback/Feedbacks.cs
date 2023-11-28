@@ -1,21 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
-namespace BookStoreCommon.Cart
+namespace BookStoreCommon.Feedback
 {
-    public class Cart
+    public class Feedbacks
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int CartId { get; set; }
+        public int FeedbackId { get; set; }
+
         [Required(ErrorMessage = "UserId is null")]
         public int UserId { get; set; }
-        //public virtual UserRegister UserRegister { get; set; }
+
         [Required(ErrorMessage = "BookId is null")]
         public int BookId { get; set; }
-        //public virtual Book Book { get; set; }
+
+        [Required(ErrorMessage = "CustomerDescription is null")]
+        public string CustomerDescription { get; set; }
+
+        [Required(ErrorMessage = "Rating is null")]
+        public int Rating { get; set; }
     }
 }

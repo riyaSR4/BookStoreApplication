@@ -17,8 +17,7 @@ namespace BookStoreApplication.Controllers
         public int userid;
         public WishlistController(IWishlistBusiness wishlistBusiness)
         {
-            this.wishlistBusiness = wishlistBusiness;
-            this.userid = Convert.ToInt32(User.Claims.FirstOrDefault(v => v.Type == "Id").Value);
+            this.wishlistBusiness = wishlistBusiness;  
         }
         [HttpPost]
         [Route("AddWishlist")]
@@ -26,8 +25,9 @@ namespace BookStoreApplication.Controllers
         {
             try
             {
-                wishlist.UserId = this.userid;
-                var result = this.wishlistBusiness.AddWishlist(wishlist);
+                int userid = Convert.ToInt32(User.Claims.FirstOrDefault(v => v.Type == "Id").Value);
+                
+                var result = this.wishlistBusiness.AddWishlist(wishlist,userid);
                 if (result != null)
                 {
                     return this.Ok(new { Status = true, Message = "Wishlist Added Successfully", Data = wishlist });
@@ -41,11 +41,12 @@ namespace BookStoreApplication.Controllers
         }
         [HttpPut]
         [Route("DeleteWishlist")]
-        public ActionResult DeleteWishlist(int bookid)
+        public ActionResult DeleteWishlist(int BookId)
         {
             try
             {
-                var result = this.wishlistBusiness.DeleteWishlist(bookid, this.userid);
+                int userid = Convert.ToInt32(User.Claims.FirstOrDefault(v => v.Type == "Id").Value);
+                var result = this.wishlistBusiness.DeleteWishlist(BookId, this.userid);
                 if (result)
                 {
                     return this.Ok(new { Status = true, Message = "Wishlist Deleted Successfully" });
@@ -63,7 +64,8 @@ namespace BookStoreApplication.Controllers
         {
             try
             {
-                var result = this.wishlistBusiness.GetAllWishList(this.userid);
+                int userid = Convert.ToInt32(User.Claims.FirstOrDefault(v => v.Type == "Id").Value);
+                var result = this.wishlistBusiness.GetAllWishList(userid);
                 if (result != null)
                 {
                     return this.Ok(new { Status = true, Message = "All Books Found", data = result });

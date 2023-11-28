@@ -17,9 +17,9 @@ namespace BookStoreBusiness.Business
         {
             this.wishlistRepo = wishlistRepo;
         }
-        public Task<int> AddWishlist(Wishlist wishlist)
+        public Task<int> AddWishlist(Wishlist wishlist, int userId)
         {
-            var result = this.wishlistRepo.AddWishlist(wishlist);
+            var result = this.wishlistRepo.AddWishlist(wishlist,userId);
             return result;
         }
         public bool DeleteWishlist(int UserId, int BookId)

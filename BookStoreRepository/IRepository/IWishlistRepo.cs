@@ -8,7 +8,7 @@ namespace BookStoreRepository.IRepository
 {
     public interface IWishlistRepo
     {
-        public Task<int> AddWishlist(Wishlist wishlist);
+        public Task<int> AddWishlist(Wishlist wishlist, int userId);
         public bool DeleteWishlist(int UserId, int BookId);
         public IEnumerable<Wishlist> GetAllWishList(int UserId);
     }

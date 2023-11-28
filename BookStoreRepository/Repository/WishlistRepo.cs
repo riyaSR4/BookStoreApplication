@@ -24,7 +24,7 @@ namespace BookStoreRepository.Repository
             string connectionStr = this.iconfiguration[("ConnectionStrings:UserDbConnection")];
             con = new SqlConnection(connectionStr);
         }
-        public async Task<int> AddWishlist(Wishlist wishlist)
+        public async Task<int> AddWishlist(Wishlist wishlist ,int userId)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace BookStoreRepository.Repository
                 SqlCommand com = new SqlCommand("spAddWishlist", con);
                 com.CommandType = CommandType.StoredProcedure;
                 com.Parameters.AddWithValue("@BookId", wishlist.BookId);
-                com.Parameters.AddWithValue("@UserId", wishlist.UserId);
+                com.Parameters.AddWithValue("@UserId", userId);
                 con.Open();
                 int result = await com.ExecuteNonQueryAsync();
                 return result;
@@ -81,7 +81,7 @@ namespace BookStoreRepository.Repository
         {
             Connection();
             List<Wishlist> wishlist = new List<Wishlist>();
-            SqlCommand com = new SqlCommand("spGetWishList", con);
+            SqlCommand com = new SqlCommand("spGetAllWishList", con);
             com.CommandType = CommandType.StoredProcedure;
             com.Parameters.AddWithValue("@UserId", UserId);
             SqlDataAdapter da = new SqlDataAdapter(com);
@@ -95,10 +95,11 @@ namespace BookStoreRepository.Repository
                     new Wishlist()
                     {
                         BookId = Convert.ToInt32(dr["BookId"]),
-                        UserId = Convert.ToInt32(dr["UserId"]),
-                        WishlistId = Convert.ToInt32(dr["WishlistId"]),
+                        //UserId = Convert.ToInt32(dr["UserId"]),
+                       // WishlistId = Convert.ToInt32(dr["WishlistId"]),
                         book = new Books()
                         {
+                            BookId = Convert.ToInt32(dr["BookId"]),
                             BookName = dr["BookName"].ToString(),
                             BookDescription = dr["BookDescription"].ToString(),
                             BookAuthor = dr["BookAuthor"].ToString(),

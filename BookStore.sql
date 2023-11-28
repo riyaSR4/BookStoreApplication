@@ -8,7 +8,7 @@ Password varchar(20),
 MobileNumber varchar(20)
 );
 
-create procedure UserRegistration
+alter procedure spUserRegistration
 (
 @FullName varchar(30),
 @EmailId varchar(30),
@@ -17,22 +17,32 @@ create procedure UserRegistration
 )
 As
 Begin
+Begin try
 Insert into UserRegister(FullName,EmailId,Password,MobileNumber) 
 values(@FullName,@EmailId,@Password,@MobileNumber)
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 End
 
 EXEC sp_rename 'UserRegistration', 'spUserRegistration';
 
-Create procedure GetUser(
+Alter procedure spGetUser(
 @EmailId varchar(30)
 )
 As Begin 
+Begin try
 Select * from UserRegister where EmailId = @EmailId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
 
 EXEC sp_rename 'GetUser', 'spGetUser';
 
-Create Procedure spResetPassword(
+alter Procedure spResetPassword(
 @FullName varchar(30),
 @EmailId varchar(30),
 @Password varchar(20),
@@ -40,9 +50,14 @@ Create Procedure spResetPassword(
 )
 As
 begin
+Begin try
 update UserRegister 
 set FullName=@FullName,MobileNumber=@MobileNumber,EmailId=@EmailId,Password=@Password 
 where EmailId=@EmailId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 End
 
 Create table Book(
@@ -56,7 +71,7 @@ BookPrice int,
 Rating int,
 );
 
-create procedure spAddBook
+alter procedure spAddBook
 (
 @BookName varchar(50),
 @BookDescription varchar(50),
@@ -68,19 +83,29 @@ create procedure spAddBook
 )
 As
 Begin
+Begin try
 Insert into Book(BookName,BookDescription,BookAuthor,BookImage,BookCount,BookPrice,Rating) 
 values(@BookName,@BookDescription,@BookAuthor,@BookImage,@BookCount,@BookPrice,@Rating)
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 End
 
-Create procedure GetAllBooks
+alter procedure spGetAllBooks
 As
 Begin
+Begin try
 Select * from Book
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 End
 
 EXEC sp_rename 'GetAllBooks', 'spGetAllBooks';
 
-Create procedure spUpdateBook
+alter procedure spUpdateBook
 (
 @BookId int,
 @BookName varchar(50),
@@ -93,29 +118,44 @@ Create procedure spUpdateBook
 )
 As 
 Begin
+Begin try
 Update Book set BookName=@BookName, BookDescription=@BookDescription, BookAuthor=@BookAuthor, 
 BookImage=@BookImage, BookCount=@BookCount, BookPrice=@BookPrice, Rating=@Rating
 where BookId=@BookId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 End
 
-Create procedure spDeleteEmployee
+alter procedure spDeleteBook
 (
 	@BookId int
 )
 As
 Begin
+Begin try
 Delete from Book where BookId=@BookId;
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 End
 
 EXEC sp_rename 'spDeleteEmployee', 'spDeleteBook';
 
-create procedure spUploadImage
+alter procedure spUploadImage
 (
 	@BookId int,
 	@FileLink varchar(max)
 )
-as begin 
+as begin
+Begin try 
 	update Book set BookImage = @FileLink where BookId=@BookId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
 
 Create table Wishlist(
@@ -126,15 +166,19 @@ Create table Wishlist(
     FOREIGN KEY (BookId) REFERENCES Book(BookId)
 )
 
-
-Create procedure spAddWishlist(
+alter procedure spAddWishlist(
 @UserId int,
 @BookId int
 )
 as 
 begin
+Begin try
 insert into Wishlist (UserId,BookId)
 values (@UserId,@BookId)
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
 
 alter procedure spGetWishList
@@ -142,60 +186,106 @@ alter procedure spGetWishList
 	@UserId int
 )
 as begin
+Begin try
 	select * from 
 		Wishlist INNER JOIN
 		 Book on Book.BookId = Wishlist.BookId 
 		 where Wishlist.UserId = @UserId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
 
-create Procedure spDeleteWishList
+EXEC sp_rename 'spGetWishList', 'spGetAllWishList';
+
+alter Procedure spDeleteWishList
 (
 	@UserId int,
 	@BookId int
 )
 as begin
+Begin try
 	DELETE FROM Wishlist WHERE BookId=@BookId and UserID=@UserId;
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
-
-
 
 Create table Cart(
     CartId INT PRIMARY KEY IDENTITY(1,1),
     UserId INT NOT NULL,
     BookId INT NOT NULL,
     FOREIGN KEY (UserId) REFERENCES UserRegister(UserId),
-    FOREIGN KEY (BookId) REFERENCES Book(BookId)
+    FOREIGN KEY (BookId) REFERENCES Book(BookId),
+	Count INT NOT NULL
 )
 
-Create procedure spAddCart(
+Alter procedure spAddCart(
 @UserId int,
-@BookId int
+@BookId int,
+@Count int
 )
 as 
 begin
-insert into Cart (UserId,BookId)
-values (@UserId,@BookId)
+Begin try
+insert into Cart (UserId,BookId,Count)
+values (@UserId,@BookId,@Count)
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
 
-create procedure spGetCart
+alter procedure spGetCart
 (
 	@UserId int
 )
 as begin
+Begin try
 	select * from 
 		Cart INNER JOIN
 		 Book on Book.BookId = Cart.BookId 
 		 where Cart.UserId = @UserId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
 
-create Procedure spDeleteCart
+EXEC sp_rename 'spGetCart', 'spGetAllCart';
+
+alter Procedure spDeleteCart
 (
 	@UserId int,
 	@BookId int
 )
 as begin
-	DELETE FROM Cart WHERE BookId=@BookId and UserID=@UserId;
+Begin try
+	DELETE FROM Cart WHERE BookId=@BookId and UserId=@UserId;
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
 end
+
+alter procedure spUpdateCart(
+    @UserId int,
+	@BookId int,
+	@Count int
+)
+As 
+Begin
+Begin try
+Update Cart set Count = @Count
+where BookId=@BookId and UserId = @UserId;
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+End
+
 
 Create table Type(
 TypeId INT PRIMARY KEY IDENTITY(1,1),
@@ -214,8 +304,115 @@ State varchar(50),
 FOREIGN KEY (UserId) REFERENCES UserRegister(UserId),
 FOREIGN KEY (TypeId) REFERENCES Type(TypeId)
 )
+drop table CustomerDetails
+select * from CustomerDetails;
+Select * from type;
+Select * from book
+
+Alter procedure spAddAddressDetails(
+@UserId int,
+@TypeId int,
+@FullName varchar(50),
+@MobileNumber varchar(15),
+@Address varchar(max),
+@CityOrTown varchar(max),
+@State varchar(50)
+)
+as 
+begin
+Begin try
+insert into CustomerDetails (UserId,TypeId,FullName,MobileNumber,Address,CityOrTown,State)
+values (@UserId,@TypeId,@FullName,@MobileNumber,@Address,@CityOrTown,@State)
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+end
+
+ 
+create procedure spGetAllAddress
+(
+	@UserId int
+)
+as begin
+Begin try
+	select * from 
+		CustomerDetails INNER JOIN
+		 Type on Type.TypeId = CustomerDetails.TypeId 
+		 where CustomerDetails.UserId = @UserId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+end
+
+EXEC sp_rename 'spGetAllCustomerDetails', 'spGetAllAddress';
+
+create Procedure spDeleteAddress
+(
+	@CustomerId int,
+	@UserId int
+)
+as begin
+Begin try
+	DELETE FROM CustomerDetails WHERE CustomerId=@CustomerId and UserId=@UserId;
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+end
+
+create procedure spUpdateAddress(
+@CustomerId int,
+@UserId int,
+@TypeId int,
+@FullName varchar(50),
+@MobileNumber varchar(15),
+@Address varchar(max),
+@CityOrTown varchar(max),
+@State varchar(50)
+)
+As 
+Begin
+Begin try
+Update CustomerDetails set UserId = @UserId, TypeId = @TypeId, FullName = @FullName,
+MobileNumber = @MobileNumber, Address = @Address, CityOrTown = @CityOrTown, State = @State  
+where CustomerId=@CustomerId and UserId=@UserId;
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+End
 
 
 
 
+Create table CustomerFeedback(
+    FeedbackId INT PRIMARY KEY IDENTITY(1,1),
+    UserId INT NOT NULL,
+    BookId INT NOT NULL,
+	CustomerDescription varchar(max),
+	Rating INT,
+    FOREIGN KEY (UserId) REFERENCES UserRegister(UserId),
+    FOREIGN KEY (BookId) REFERENCES Book(BookId)
+)
+
+alter procedure spAddFeedback(
+@UserId int,
+@BookId int,
+@CustomerDescription varchar(max),
+@Rating int
+)
+as 
+begin
+Begin try
+insert into CustomerFeedback (UserId,BookId,CustomerDescription,Rating)
+values (@UserId,@BookId,@CustomerDescription,@Rating)
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+end;
+
+Select * from CustomerFeedback
 

@@ -1,26 +1,26 @@
-﻿using BookStoreCommon.User;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using BookStoreCommon.Book;
 
-namespace BookStoreCommon.Wishlist
+namespace BookStoreCommon.Cart
 {
-    public class Wishlist
+    public class Carts
     {
         //[Key]
         //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        //public int WishlistId { get; set; }
-      
+        //public int CartId { get; set; }
+
         //[Required(ErrorMessage = "UserId is null")]
         //public int UserId { get; set; }
-       
-        //[Required(ErrorMessage = "BookId is null")]
+        
+        [Required(ErrorMessage = "BookId is null")]
         public int BookId { get; set; }
 
-        public virtual Books book  { get; set; }
-        
+        [Required(ErrorMessage = "Count is null")]
+        public int Count { get; set; }
+        public virtual Books Book { get; set; }
     }
 }
