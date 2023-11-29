@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 namespace BookStoreBusiness.Business
 {
@@ -16,10 +17,32 @@ namespace BookStoreBusiness.Business
         {
             this.feedbackRepo = feedbackRepo;
         }
+        Nlog nlog = new Nlog();
         public Task<int> AddFeedback(Feedbacks feedback, int userId)
         {
-            var result = this.feedbackRepo.AddFeedback(feedback, userId);
-            return result;
+            try
+            {
+                var result = this.feedbackRepo.AddFeedback(feedback, userId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
+        }
+        public IEnumerable<Feedbacks> GetAllFeedback(int UserId)
+        {
+            try
+            {
+                var result = this.feedbackRepo.GetAllFeedback(UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

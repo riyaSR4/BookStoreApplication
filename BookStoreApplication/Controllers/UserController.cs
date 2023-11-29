@@ -8,6 +8,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Utility;
 
 namespace BookStoreApplication.Controllers
 {
@@ -20,6 +21,7 @@ namespace BookStoreApplication.Controllers
         {
             this.userBusiness = userBusiness;
         }
+        Nlog nlog = new Nlog();
 
         [HttpPost]
         [Route("UserRegistration")]
@@ -30,6 +32,7 @@ namespace BookStoreApplication.Controllers
                 var result = await this.userBusiness.UserRegistration(userRegister);
                 if (result != 0)
                 {
+                    nlog.LogInfo("User Registered Successfully");
                     return this.Ok(new { Status = true, Message = "User Registered Successfully", Data = userRegister });
                 }
                 return this.BadRequest(new { Status = false, Message = "User Registration Unsuccessful", Data = String.Empty });
@@ -52,6 +55,7 @@ namespace BookStoreApplication.Controllers
                     var jwtToken = tokenhandler.ReadJwtToken(result);
                     var id = jwtToken.Claims.FirstOrDefault(c => c.Type == "Id");
                     string Id = id.Value;
+                    nlog.LogInfo("User Logged In Successfully");
                     return this.Ok(new { Status = true, Message = "User Logged In Successfully", Data = result, id = Id });
                 }
                 return this.BadRequest(new { Status = false, Message = "User Login Unsuccessful" });
@@ -70,6 +74,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.userBusiness.ForgetPassword(email);
                 if (result != null)
                 {
+                    nlog.LogInfo("Reset Email Send");
                     return this.Ok(new { Status = true, Message = "Reset Email Send" });
                 }
                 return this.BadRequest(new { Status = false, Message = "Reset UnSuccessful" });
@@ -90,6 +95,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.userBusiness.ResetPassword(email,newpassword, confirmpassword);
                 if (result != null)
                 {
+                    nlog.LogInfo("User Password Reset Successful");
                     return this.Ok(new { Status = true, Message = "User Password Reset Successful", Data = result });
                 }
                 return this.BadRequest(new { Status = false, Message = "User Password Reset Unsuccessful" });

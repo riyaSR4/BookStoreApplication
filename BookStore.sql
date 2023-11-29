@@ -307,7 +307,7 @@ FOREIGN KEY (TypeId) REFERENCES Type(TypeId)
 drop table CustomerDetails
 select * from CustomerDetails;
 Select * from type;
-Select * from book
+Select * from Cart
 
 Alter procedure spAddAddressDetails(
 @UserId int,
@@ -414,5 +414,45 @@ Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 end;
 
+
+alter procedure spGetAllFeedback
+(
+	@UserId int
+)
+as begin
+Begin try
+	select * from 
+		CustomerFeedback INNER JOIN
+		 Book on Book.BookId = CustomerFeedback.BookId 
+		 where CustomerFeedback.UserId = @UserId
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+end
+
+
 Select * from CustomerFeedback
 
+Create table OrderPlaced(
+    OrderId INT PRIMARY KEY IDENTITY(1,1),
+    CustomerId INT NOT NULL,
+    CartId INT NOT NULL,
+    FOREIGN KEY (CustomerId) REFERENCES CustomerDetails(CustomerId),
+    FOREIGN KEY (CartId) REFERENCES Cart(CartId)
+)
+
+create procedure spPlaceOrder(
+@CustomerId int,
+@CartId int
+)
+as 
+begin
+Begin try
+insert into OrderPlaced (CustomerId,CartId)
+values (@CustomerId,@CartId)
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+end;

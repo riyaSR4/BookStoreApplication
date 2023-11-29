@@ -9,5 +9,6 @@ namespace BookStoreRepository.IRepository
     public interface IFeedbackRepo
     {
         public Task<int> AddFeedback(Feedbacks feedback, int userId);
+        public IEnumerable<Feedbacks> GetAllFeedback(int UserId);
     }
 }

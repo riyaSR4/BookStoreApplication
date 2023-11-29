@@ -6,6 +6,7 @@ using System.Linq;
 using System;
 using BookStoreCommon.Cart;
 using BookStoreCommon.Book;
+using Utility;
 
 namespace BookStoreApplication.Controllers
 {
@@ -19,6 +20,8 @@ namespace BookStoreApplication.Controllers
         {
             this.cartBusiness = cartBusiness;
         }
+        Nlog nlog = new Nlog();
+
         [HttpPost]
         [Route("AddCart")]
         public ActionResult AddCart(Carts cart)
@@ -30,6 +33,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.cartBusiness.AddCart(cart,userid);
                 if (result != null)
                 {
+                    nlog.LogInfo("Cart Added Successfully");
                     return this.Ok(new { Status = true, Message = "Cart Added Successfully", Data = cart });
                 }
                 return this.BadRequest(new { Status = false, Message = "Adding cart Unsuccessful", Data = String.Empty });
@@ -49,6 +53,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.cartBusiness.DeleteCart(BookId, this.userid);
                 if (result)
                 {
+                    nlog.LogInfo("Cart Deleted Successfully");
                     return this.Ok(new { Status = true, Message = "Cart Deleted Successfully" });
                 }
                 return this.BadRequest(new { Status = false, Message = "Deleting Cart Unsuccessful" });
@@ -68,6 +73,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.cartBusiness.GetAllCart(userid);
                 if (result != null)
                 {
+                    nlog.LogInfo("All Carts Found");
                     return this.Ok(new { Status = true, Message = "All Carts Found", data = result });
                 }
                 return this.BadRequest(new { Status = false, Message = "No Carts Found" });
@@ -87,6 +93,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.cartBusiness.UpdateCart(obj, userid);
                 if (result)
                 {
+                    nlog.LogInfo("Cart Updated Successfully");
                     return this.Ok(new { Status = true, Message = "Cart Updated Successfully", Data = obj });
                 }
                 return this.BadRequest(new { Status = false, Message = "Updating Cart Unsuccessful" });

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 namespace BookStoreBusiness.Business
 {
@@ -16,30 +17,71 @@ namespace BookStoreBusiness.Business
         {
             this.bookRepo = bookRepo;
         }
+        Nlog nlog = new Nlog();
         public Task<int> AddBook(Books obj)
         {
-            var result = this.bookRepo.AddBook(obj);
-            return result;
+            try
+            {
+                var result = this.bookRepo.AddBook(obj);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
         public IEnumerable<Books> GetAllBooks()
         {
-            var result = this.bookRepo.GetAllBooks();
-            return result;
+            try
+            {
+                var result = this.bookRepo.GetAllBooks();
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
         public bool UpdateBook(Books obj)
         {
-            var result = this.bookRepo.UpdateBook(obj);
-            return result;
+            try
+            {
+                var result = this.bookRepo.UpdateBook(obj);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
         public bool DeleteBook(int BookId)
         {
-            var result = this.bookRepo.DeleteBook(BookId);
-            return result;
+            try
+            {
+                var result = this.bookRepo.DeleteBook(BookId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
         public bool Image(IFormFile file, int BookId)
         {
-            var result = this.bookRepo.Image(file,BookId);
-            return result;
+            try
+            {
+                var result = this.bookRepo.Image(file, BookId);
+                return result;
+            }
+            catch(Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

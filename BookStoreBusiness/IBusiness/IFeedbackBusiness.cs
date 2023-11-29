@@ -9,5 +9,6 @@ namespace BookStoreBusiness.IBusiness
     public interface IFeedbackBusiness
     {
         public Task<int> AddFeedback(Feedbacks feedback, int userId);
+        public IEnumerable<Feedbacks> GetAllFeedback(int UserId);
     }
 }

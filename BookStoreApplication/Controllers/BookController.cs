@@ -7,6 +7,8 @@ using System;
 using BookStoreCommon.Book;
 using System.Net;
 using Microsoft.AspNetCore.Authorization;
+using Utility;
+using NLog.Fluent;
 
 namespace BookStoreApplication.Controllers
 {
@@ -20,6 +22,7 @@ namespace BookStoreApplication.Controllers
         {
             this.bookBusiness = bookBusiness;
         }
+        Nlog nlog = new Nlog();
 
         [HttpPost]
         [Route("AddBook")]
@@ -30,6 +33,7 @@ namespace BookStoreApplication.Controllers
                 var result = await this.bookBusiness.AddBook(book);
                 if (result != 0)
                 {
+                    nlog.LogInfo("Book Added Successfully");
                     return this.Ok(new { Status = true, Message = "Book Added Successfully", Data = book });
                 }
                 return this.BadRequest(new { Status = false, Message = "Adding Book Unsuccessful", Data = String.Empty });
@@ -48,6 +52,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.bookBusiness.GetAllBooks();
                 if (result != null)
                 {
+                    nlog.LogInfo("All Books Found");
                     return this.Ok(new { Status = true, Message = "All Books Found", data = result });
                 }
                 return this.BadRequest(new { Status = false, Message = "No Books Found" });
@@ -66,6 +71,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.bookBusiness.UpdateBook(book);
                 if (result)
                 {
+                    nlog.LogInfo("Book Updated Successfully");
                     return this.Ok(new { Status = true, Message = "Book Updated Successfully", Data = book });
                 }
                 return this.BadRequest(new { Status = false, Message = "Updating Book Unsuccessful" });
@@ -84,6 +90,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.bookBusiness.DeleteBook(BookId);
                 if (result)
                 {
+                    nlog.LogInfo("Book Deleted Successfully");
                     return this.Ok(new { Status = true, Message = "Book Deleted Successfully" });
                 }
                 return this.BadRequest(new { Status = false, Message = "Deleting Book Unsuccessful" });
@@ -102,6 +109,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.bookBusiness.Image(file, BookId);
                 if (result)
                 {
+                    nlog.LogInfo("Image Uploaded Successfully");
                     return this.Ok(new { Status = true, Message = "Image Uploaded Successfully", data = result });
                 }
                 return this.BadRequest(new { Status = false, Message = "Uploading Image Unsuccessful" });

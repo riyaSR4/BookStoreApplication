@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 namespace BookStoreBusiness.Business
 {
@@ -17,20 +18,45 @@ namespace BookStoreBusiness.Business
         {
             this.wishlistRepo = wishlistRepo;
         }
+        Nlog nlog = new Nlog();
         public Task<int> AddWishlist(Wishlist wishlist, int userId)
         {
-            var result = this.wishlistRepo.AddWishlist(wishlist,userId);
-            return result;
+            try
+            {
+                var result = this.wishlistRepo.AddWishlist(wishlist, userId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
         public bool DeleteWishlist(int UserId, int BookId)
         {
-            var result = this.wishlistRepo.DeleteWishlist(UserId, BookId);
-            return result;
+            try
+            {
+                var result = this.wishlistRepo.DeleteWishlist(UserId, BookId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
         public IEnumerable<Wishlist> GetAllWishList(int UserId)
         {
-            var result = this.wishlistRepo.GetAllWishList(UserId);
-            return result;
+            try
+            {
+                var result = this.wishlistRepo.GetAllWishList(UserId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

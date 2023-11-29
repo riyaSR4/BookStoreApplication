@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System;
 using BookStoreCommon.CustomerDetail;
+using Utility;
 
 namespace BookStoreApplication.Controllers
 {
@@ -18,6 +19,8 @@ namespace BookStoreApplication.Controllers
         {
             this.customerDetailBusiness = customerDetailBusiness;
         }
+        Nlog nlog = new Nlog();
+
         [HttpPost]
         [Route("AddAddress")]
         public ActionResult AddAddress(CustomerDetails customerDetails)
@@ -29,6 +32,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.customerDetailBusiness.AddAddress(customerDetails, userid);
                 if (result != null)
                 {
+                    nlog.LogInfo("Address Added Successfully");
                     return this.Ok(new { Status = true, Message = "Address Added Successfully", Data = customerDetails });
                 }
                 return this.BadRequest(new { Status = false, Message = "Adding address Unsuccessful", Data = String.Empty });
@@ -48,6 +52,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.customerDetailBusiness.DeleteAddress(CustomerId, this.userid);
                 if (result)
                 {
+                    nlog.LogInfo("Address Deleted Successfully");
                     return this.Ok(new { Status = true, Message = "Address Deleted Successfully" });
                 }
                 return this.BadRequest(new { Status = false, Message = "Deleting Address Unsuccessful" });
@@ -67,6 +72,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.customerDetailBusiness.GetAllAddress(userid);
                 if (result != null)
                 {
+                    nlog.LogInfo("All Address Found");
                     return this.Ok(new { Status = true, Message = "All Address Found", data = result });
                 }
                 return this.BadRequest(new { Status = false, Message = "No Address Found" });
@@ -86,6 +92,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.customerDetailBusiness.UpdateAddress(obj, userid);
                 if (result)
                 {
+                    nlog.LogInfo("Address Updated Successfully");
                     return this.Ok(new { Status = true, Message = "Address Updated Successfully", Data = obj });
                 }
                 return this.BadRequest(new { Status = false, Message = "Updating Address Unsuccessful" });

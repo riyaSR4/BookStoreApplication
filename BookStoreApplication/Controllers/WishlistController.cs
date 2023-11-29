@@ -6,6 +6,7 @@ using System;
 using BookStoreCommon.Wishlist;
 using BookStoreBusiness.IBusiness;
 using System.Linq;
+using Utility;
 
 namespace BookStoreApplication.Controllers
 {
@@ -19,6 +20,8 @@ namespace BookStoreApplication.Controllers
         {
             this.wishlistBusiness = wishlistBusiness;  
         }
+        Nlog nlog = new Nlog();
+
         [HttpPost]
         [Route("AddWishlist")]
         public ActionResult AddWishlist(Wishlist wishlist)
@@ -30,6 +33,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.wishlistBusiness.AddWishlist(wishlist,userid);
                 if (result != null)
                 {
+                    nlog.LogInfo("Wishlist Added Successfully");
                     return this.Ok(new { Status = true, Message = "Wishlist Added Successfully", Data = wishlist });
                 }
                 return this.BadRequest(new { Status = false, Message = "Adding wishlist Unsuccessful", Data = String.Empty });
@@ -49,6 +53,7 @@ namespace BookStoreApplication.Controllers
                 var result = this.wishlistBusiness.DeleteWishlist(BookId, this.userid);
                 if (result)
                 {
+                    nlog.LogInfo("Wishlist Deleted Successfully");
                     return this.Ok(new { Status = true, Message = "Wishlist Deleted Successfully" });
                 }
                 return this.BadRequest(new { Status = false, Message = "Deleting wishlist Unsuccessful" });
@@ -68,9 +73,10 @@ namespace BookStoreApplication.Controllers
                 var result = this.wishlistBusiness.GetAllWishList(userid);
                 if (result != null)
                 {
-                    return this.Ok(new { Status = true, Message = "All Books Found", data = result });
+                    nlog.LogInfo("All Wishlists Found");
+                    return this.Ok(new { Status = true, Message = "All Wishlists Found", data = result });
                 }
-                return this.BadRequest(new { Status = false, Message = "No Books Found" });
+                return this.BadRequest(new { Status = false, Message = "No Wishlist Found" });
             }
             catch (Exception ex)
             {

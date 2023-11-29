@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 namespace BookStoreRepository.Repository
 {
@@ -29,6 +30,7 @@ namespace BookStoreRepository.Repository
             string connectionStr = this.iconfiguration[("ConnectionStrings:UserDbConnection")];
             con = new SqlConnection(connectionStr);
         }
+        Nlog nlog = new Nlog();
         public async Task<int> UserRegistration(UserRegister obj)
         {
             var password = EncryptPassword(obj.Password);
@@ -44,10 +46,12 @@ namespace BookStoreRepository.Repository
                 com.Parameters.AddWithValue("@MobileNumber", obj.MobileNumber);
                 con.Open();
                 int result = await com.ExecuteNonQueryAsync();
+                nlog.LogDebug("User Registered");
                 return result;
             }
             catch (Exception ex)
             {
+                nlog.LogError(ex.Message);
                 throw new Exception(ex.Message);
             }
             finally
@@ -66,11 +70,13 @@ namespace BookStoreRepository.Repository
                     var token = GenerateSecurityToken(userregister.EmailId, userregister.UserId);
                     return token;
                 }
+                nlog.LogDebug("User Logged In");
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                nlog.LogError(ex.Message);
+                throw new Exception(ex.Message);
             }
             finally
             {
@@ -80,26 +86,39 @@ namespace BookStoreRepository.Repository
         public UserRegister GetUser(string email)
         {
             var obj = new UserRegister();
-            Connection();
-            con.Open();
-            SqlCommand com = new SqlCommand("spGetUser", con);
-            com.CommandType = CommandType.StoredProcedure;
-            com.Parameters.AddWithValue("@EmailId", email);
-            SqlDataReader reader = com.ExecuteReader();
-
-            if (reader.Read())
+            try
             {
-                obj = new UserRegister
+                Connection();
+                con.Open();
+                SqlCommand com = new SqlCommand("spGetUser", con);
+                com.CommandType = CommandType.StoredProcedure;
+                com.Parameters.AddWithValue("@EmailId", email);
+                SqlDataReader reader = com.ExecuteReader();
+
+                if (reader.Read())
                 {
-                    UserId = (int)reader["UserId"],
-                    FullName = (string)reader["FullName"],
-                    EmailId = (string)reader["EmailId"],
-                    Password = (string)reader["Password"],
-                    MobileNumber = (string)reader["MobileNumber"]
-                };
+                    obj = new UserRegister
+                    {
+                        UserId = (int)reader["UserId"],
+                        FullName = (string)reader["FullName"],
+                        EmailId = (string)reader["EmailId"],
+                        Password = (string)reader["Password"],
+                        MobileNumber = (string)reader["MobileNumber"]
+                    };
+                }
+                con.Close();
+                nlog.LogDebug("Got User Details");
+                return obj;
             }
-            con.Close();
-            return obj;
+            catch (Exception ex)
+            {
+                nlog.LogError(ex.Message);
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
 
         }
         public string ForgetPassword(string email)
@@ -112,6 +131,7 @@ namespace BookStoreRepository.Repository
                     var token = GenerateSecurityToken(emailcheck.EmailId, emailcheck.UserId);
                     MSMQ msmq = new MSMQ();
                     msmq.sendData2Queue(token, email);
+                    nlog.LogDebug("Reset Email Send");
                     return token;
                 }
                 else
@@ -119,43 +139,61 @@ namespace BookStoreRepository.Repository
                     return null;
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                nlog.LogError(ex.Message);
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                con.Close();
             }
         }
         public UserRegister ResetPassword(string email, string newpassword, string confirmpassword)
         {
-            var userregister = GetUser(email);
-            if (newpassword.Equals(confirmpassword))
+            try
             {
-                var input = userregister;
-                var password = EncryptPassword(newpassword);
-                input.Password = password;
-                if (input != null)
+                var userregister = GetUser(email);
+                if (newpassword.Equals(confirmpassword))
                 {
-                    Connection();
-                    SqlCommand com = new SqlCommand("spResetPassword", con);
-                    com.CommandType = CommandType.StoredProcedure;
-                    com.Parameters.AddWithValue("@FullName", input.FullName);
-                    com.Parameters.AddWithValue("@EmailId", input.EmailId);
-                    com.Parameters.AddWithValue("@password", password);
-                    com.Parameters.AddWithValue("@MobileNumber", input.MobileNumber);
-                    con.Open();
-                    int i = com.ExecuteNonQuery();
-                    con.Close();
-                    if (i != 0)
+                    var input = userregister;
+                    var password = EncryptPassword(newpassword);
+                    input.Password = password;
+                    if (input != null)
                     {
-                        return input;
+                        Connection();
+                        SqlCommand com = new SqlCommand("spResetPassword", con);
+                        com.CommandType = CommandType.StoredProcedure;
+                        com.Parameters.AddWithValue("@FullName", input.FullName);
+                        com.Parameters.AddWithValue("@EmailId", input.EmailId);
+                        com.Parameters.AddWithValue("@password", password);
+                        com.Parameters.AddWithValue("@MobileNumber", input.MobileNumber);
+                        con.Open();
+                        int i = com.ExecuteNonQuery();
+                        con.Close();
+                        if (i != 0)
+                        {
+                            return input;
+                        }
+                        else
+                        {
+                            return null;
+                        }
                     }
-                    else
-                    {
-                        return null;
-                    }
+                    return null;
                 }
+                nlog.LogDebug("Password reset");
                 return null;
             }
-            return null;
+            catch (Exception ex)
+            {
+                nlog.LogError(ex.Message);
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
         }
 
         public string GenerateSecurityToken(string email, int userId)

@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Text;
 using System.Threading.Tasks;
+using Utility;
 
 namespace BookStoreRepository.Repository
 {
@@ -24,6 +25,7 @@ namespace BookStoreRepository.Repository
             string connectionStr = this.iconfiguration[("ConnectionStrings:UserDbConnection")];
             con = new SqlConnection(connectionStr);
         }
+        Nlog nlog = new Nlog();
         public async Task<int> AddWishlist(Wishlist wishlist ,int userId)
         {
             try
@@ -35,11 +37,13 @@ namespace BookStoreRepository.Repository
                 com.Parameters.AddWithValue("@UserId", userId);
                 con.Open();
                 int result = await com.ExecuteNonQueryAsync();
+                nlog.LogDebug("Added to Wishlist");
                 return result;
 
             }
             catch (Exception ex)
             {
+                nlog.LogError(ex.Message);
                 throw new Exception(ex.Message);
             }
             finally
@@ -61,6 +65,7 @@ namespace BookStoreRepository.Repository
                 con.Close();
                 if (i != 0)
                 {
+                    nlog.LogDebug("Deleted from Wishlist");
                     return true;
                 }
                 else
@@ -70,6 +75,7 @@ namespace BookStoreRepository.Repository
             }
             catch (Exception ex)
             {
+                nlog.LogError(ex.Message);
                 throw new Exception(ex.Message);
             }
             finally
@@ -79,38 +85,51 @@ namespace BookStoreRepository.Repository
         }
         public IEnumerable<Wishlist> GetAllWishList(int UserId)
         {
-            Connection();
-            List<Wishlist> wishlist = new List<Wishlist>();
-            SqlCommand com = new SqlCommand("spGetAllWishList", con);
-            com.CommandType = CommandType.StoredProcedure;
-            com.Parameters.AddWithValue("@UserId", UserId);
-            SqlDataAdapter da = new SqlDataAdapter(com);
-            DataTable dt = new DataTable();
-            con.Open();
-            da.Fill(dt);
-            con.Close();
-            foreach (DataRow dr in dt.Rows)
+            try
             {
-                wishlist.Add(
-                    new Wishlist()
-                    {
-                        BookId = Convert.ToInt32(dr["BookId"]),
-                        //UserId = Convert.ToInt32(dr["UserId"]),
-                       // WishlistId = Convert.ToInt32(dr["WishlistId"]),
-                        book = new Books()
+                Connection();
+                List<Wishlist> wishlist = new List<Wishlist>();
+                SqlCommand com = new SqlCommand("spGetAllWishList", con);
+                com.CommandType = CommandType.StoredProcedure;
+                com.Parameters.AddWithValue("@UserId", UserId);
+                SqlDataAdapter da = new SqlDataAdapter(com);
+                DataTable dt = new DataTable();
+                con.Open();
+                da.Fill(dt);
+                con.Close();
+                foreach (DataRow dr in dt.Rows)
+                {
+                    wishlist.Add(
+                        new Wishlist()
                         {
                             BookId = Convert.ToInt32(dr["BookId"]),
-                            BookName = dr["BookName"].ToString(),
-                            BookDescription = dr["BookDescription"].ToString(),
-                            BookAuthor = dr["BookAuthor"].ToString(),
-                            BookImage = Convert.ToString(dr["BookImage"]),
-                            BookPrice = Convert.ToInt32(dr["BookPrice"]),
-                            Rating = Convert.ToInt32(dr["Rating"])
-                        },
-                    }
-                    );
+                            //UserId = Convert.ToInt32(dr["UserId"]),
+                            // WishlistId = Convert.ToInt32(dr["WishlistId"]),
+                            book = new Books()
+                            {
+                                BookId = Convert.ToInt32(dr["BookId"]),
+                                BookName = dr["BookName"].ToString(),
+                                BookDescription = dr["BookDescription"].ToString(),
+                                BookAuthor = dr["BookAuthor"].ToString(),
+                                BookImage = Convert.ToString(dr["BookImage"]),
+                                BookPrice = Convert.ToInt32(dr["BookPrice"]),
+                                Rating = Convert.ToInt32(dr["Rating"])
+                            },
+                        }
+                        );
+                }
+                nlog.LogDebug("Got all in Wishlist");
+                return wishlist;
             }
-            return wishlist;
+            catch (Exception ex)
+            {
+                nlog.LogError(ex.Message);
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
         }
     }
 }
