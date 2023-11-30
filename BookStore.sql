@@ -456,3 +456,45 @@ Begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 end;
+
+Create table OrderSummary(
+SummaryId INT PRIMARY KEY IDENTITY(1,1),
+OrderId INT NOT NULL
+)
+
+create procedure spOrderSummary
+(
+@UserId int
+)
+as
+begin
+begin try
+	SELECT
+		 OS.SummaryId,
+		 OS.OrderId,
+		 OP.CustomerId,
+		 OP.CartId,
+		 C.UserId,
+		 B.BookId,
+		 C.Count,
+		 B.BookName,
+		 B.BookDescription,
+		 B.BookAuthor,
+		 B.BookImage,
+		 B.BookCount,
+		 B.BookPrice,
+		 B.Rating
+	FROM
+		OrderSummary OS
+	JOIN
+		OrderPlaced OP ON OS.OrderId = OP.OrderId
+	JOIN
+		Cart C ON OP.CartId = C.CartId
+	JOIN 
+	  Book B on C.BookId=B.BookId
+	where C.UserId=@UserId;
+end try
+begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+end catch
+end

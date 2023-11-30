@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BookStoreCommon.Cart;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -17,5 +18,6 @@ namespace BookStoreCommon.OrderPlaced
 
         [Required(ErrorMessage = "CartId is null")]
         public int CartId { get; set; }
+        public virtual Carts Cart { get; set; }
     }
 }
