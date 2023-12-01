@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System;
 using Utility;
+using StackExchange.Redis;
 
 namespace BookStoreApplication.Controllers
 {
@@ -21,12 +22,12 @@ namespace BookStoreApplication.Controllers
 
         [HttpGet]
         [Route("GetOrderSummary")]
-        public ActionResult GetOrderSummary()
+        public ActionResult GetOrderSummary(int OrderId)
         {
             try
             {
                 int userid = Convert.ToInt32(User.Claims.FirstOrDefault(v => v.Type == "Id").Value);
-                var result = this.orderSummaryBusiness.GetOrderSummary(userid);
+                var result = this.orderSummaryBusiness.GetOrderSummary(userid, OrderId);
                 if (result != null)
                 {
                     nlog.LogInfo("All Order Summary Found");

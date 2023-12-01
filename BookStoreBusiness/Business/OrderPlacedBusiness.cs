@@ -17,11 +17,11 @@ namespace BookStoreBusiness.Business
             this.orderPlacedRepo = orderPlacedRepo;
         }
         Nlog nlog = new Nlog();
-        public Task<int> PlaceOrder(int CartId, int CustomerId)
+        public Task<int> PlaceOrder(int UserId, int CartId, int CustomerId)
         {
             try
             {
-                var result = this.orderPlacedRepo.PlaceOrder(CartId, CustomerId);
+                var result = this.orderPlacedRepo.PlaceOrder(UserId, CartId, CustomerId);
                 return result;
             }
             catch (Exception ex)

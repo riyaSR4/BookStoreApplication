@@ -7,6 +7,6 @@ namespace BookStoreBusiness.IBusiness
 {
     public interface IOrderSummaryBusiness
     {
-        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId);
+        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId, int OrderId);
     }
 }

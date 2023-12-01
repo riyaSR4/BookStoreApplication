@@ -26,6 +26,7 @@ namespace BookStoreApplication.Controllers
 
         [HttpPost]
         [Route("AddBook")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> AddBook(Books book)
         {
             try
@@ -64,6 +65,7 @@ namespace BookStoreApplication.Controllers
         }
         [HttpPut]
         [Route("UpdateBook")]
+        [Authorize(Roles = "Admin")]
         public ActionResult UpdateBook(Books book)
         {
             try
@@ -83,6 +85,7 @@ namespace BookStoreApplication.Controllers
         }
         [HttpPut]
         [Route("DeleteBook")]
+        [Authorize(Roles = "Admin")]
         public ActionResult DeleteBook(int BookId)
         {
             try
@@ -113,6 +116,25 @@ namespace BookStoreApplication.Controllers
                     return this.Ok(new { Status = true, Message = "Image Uploaded Successfully", data = result });
                 }
                 return this.BadRequest(new { Status = false, Message = "Uploading Image Unsuccessful" });
+            }
+            catch (Exception ex)
+            {
+                return this.NotFound(new { Status = false, Message = ex.Message });
+            }
+        }
+        [HttpGet]
+        [Route("GetBookById")]
+        public async Task<ActionResult> GetBookById(int BookId)
+        {
+            try
+            {
+                var result = this.bookBusiness.GetBookById(BookId);
+                if (result != null)
+                {
+                    nlog.LogInfo("Book by Id Found");
+                    return this.Ok(new { Status = true, Message = "Book by Id Found", data = result });
+                }
+                return this.BadRequest(new { Status = false, Message = "No Book Found" });
             }
             catch (Exception ex)
             {

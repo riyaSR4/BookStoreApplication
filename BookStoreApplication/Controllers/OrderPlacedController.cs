@@ -26,7 +26,8 @@ namespace BookStoreApplication.Controllers
         {
             try
             {
-                var result = this.orderPlacedBusiness.PlaceOrder(CartId, CustomerId);
+                int userid = Convert.ToInt32(User.Claims.FirstOrDefault(v => v.Type == "Id").Value);
+                var result = this.orderPlacedBusiness.PlaceOrder(userid,CartId, CustomerId);
                 if (result != null)
                 {
                     nlog.LogInfo("Order Placed Successfully");

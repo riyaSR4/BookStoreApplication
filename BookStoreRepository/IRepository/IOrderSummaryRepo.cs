@@ -7,6 +7,6 @@ namespace BookStoreRepository.IRepository
 {
     public interface IOrderSummaryRepo
     {
-        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId);
+        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId, int OrderId);
     }
 }

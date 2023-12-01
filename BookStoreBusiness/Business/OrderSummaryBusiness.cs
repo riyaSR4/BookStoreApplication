@@ -16,11 +16,11 @@ namespace BookStoreBusiness.Business
             this.orderSummaryRepo = orderSummaryRepo;
         }
         Nlog nlog = new Nlog();
-        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId)
+        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId, int OrderId)
         {
             try
             {
-                var result = this.orderSummaryRepo.GetOrderSummary(UserId);
+                var result = this.orderSummaryRepo.GetOrderSummary(UserId, OrderId);
                 return result;
             }
             catch (Exception ex)

@@ -83,5 +83,18 @@ namespace BookStoreBusiness.Business
                 throw new Exception(ex.Message);
             }
         }
+        public IEnumerable<Books> GetBookById(int BookId)
+        {
+            try
+            {
+                var result = this.bookRepo.GetBookById(BookId);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogWarn(ex.Message);
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

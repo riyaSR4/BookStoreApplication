@@ -26,7 +26,7 @@ namespace BookStoreRepository.Repository
             con = new SqlConnection(connectionStr);
         }
         Nlog nlog = new Nlog();
-        public async Task<int> PlaceOrder(int CartId, int CustomerId)
+        public async Task<int> PlaceOrder(int UserId, int CartId, int CustomerId)
         {
             try
             {
@@ -35,6 +35,7 @@ namespace BookStoreRepository.Repository
                 com.CommandType = CommandType.StoredProcedure;
                 com.Parameters.AddWithValue("@CustomerId", CustomerId);
                 com.Parameters.AddWithValue("@CartId", CartId);
+                com.Parameters.AddWithValue("@UserId", UserId);
                 con.Open();
                 int result = await com.ExecuteNonQueryAsync();
                 nlog.LogDebug("Order Placed");

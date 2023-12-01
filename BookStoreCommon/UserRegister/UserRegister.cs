@@ -27,5 +27,8 @@ namespace BookStoreCommon.User
 
         [Required(ErrorMessage = "Mobile Number is null")]
         public string MobileNumber { get; set; }
+
+        [Required(ErrorMessage = "IsAdmin is null")]
+        public bool IsAdmin { get; set; }
     }
 }

@@ -7,6 +7,6 @@ namespace BookStoreBusiness.IBusiness
 {
     public interface IOrderPlacedBusiness
     {
-        public Task<int> PlaceOrder(int CartId, int CustomerId);
+        public Task<int> PlaceOrder(int UserId, int CartId, int CustomerId);
     }
 }

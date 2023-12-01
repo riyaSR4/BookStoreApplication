@@ -14,5 +14,6 @@ namespace BookStoreRepository.IRepository
         public bool UpdateBook(Books obj);
         public bool DeleteBook(int BookId);
         public bool Image(IFormFile file, int BookId);
+        public IEnumerable<Books> GetBookById(int BookId);
     }
 }

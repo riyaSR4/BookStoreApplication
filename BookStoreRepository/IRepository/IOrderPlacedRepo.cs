@@ -7,6 +7,6 @@ namespace BookStoreRepository.IRepository
 {
     public interface IOrderPlacedRepo
     {
-        public Task<int> PlaceOrder(int CartId, int CustomerId);
+        public Task<int> PlaceOrder(int UserId, int CartId, int CustomerId);
     }
 }

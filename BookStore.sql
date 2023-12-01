@@ -8,18 +8,30 @@ Password varchar(20),
 MobileNumber varchar(20)
 );
 
+alter table UserRegister add IsAdmin bit default 1
+
+UPDATE UserRegister
+SET IsAdmin = 1
+WHERE IsAdmin IS NULL;
+
+Select * from UserRegister
+
+DELETE FROM UserRegister
+WHERE UserId = 5;
+
 alter procedure spUserRegistration
 (
 @FullName varchar(30),
 @EmailId varchar(30),
 @Password varchar(20),
-@MobileNumber varchar(20)
+@MobileNumber varchar(20),
+@IsAdmin bit 
 )
 As
 Begin
 Begin try
-Insert into UserRegister(FullName,EmailId,Password,MobileNumber) 
-values(@FullName,@EmailId,@Password,@MobileNumber)
+Insert into UserRegister(FullName,EmailId,Password,MobileNumber,IsAdmin) 
+values(@FullName,@EmailId,@Password,@MobileNumber,@IsAdmin)
 End try
 Begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
@@ -46,19 +58,22 @@ alter Procedure spResetPassword(
 @FullName varchar(30),
 @EmailId varchar(30),
 @Password varchar(20),
-@MobileNumber varchar(20)
+@MobileNumber varchar(20),
+@IsAdmin bit
 )
 As
 begin
 Begin try
 update UserRegister 
-set FullName=@FullName,MobileNumber=@MobileNumber,EmailId=@EmailId,Password=@Password 
+set FullName=@FullName,MobileNumber=@MobileNumber,EmailId=@EmailId,Password=@Password,IsAdmin=@IsAdmin
 where EmailId=@EmailId
 End try
 Begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 End
+
+----------------------------------------------------------------------------------------------
 
 Create table Book(
 BookId int primary key identity(1,1),
@@ -70,6 +85,8 @@ BookCount int,
 BookPrice int,
 Rating int,
 );
+
+Select * from Book
 
 alter procedure spAddBook
 (
@@ -158,6 +175,22 @@ Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 end
 
+create procedure spGetBookById
+(
+	@BookId int
+)
+As
+Begin
+Begin try
+Select * from Book where BookId=@BookId;
+End try
+Begin catch
+Print 'An Error occured: ' + ERROR_MESSAGE();
+End Catch
+End
+
+------------------------------------------------------------------------------
+
 Create table Wishlist(
     WishlistId INT PRIMARY KEY IDENTITY(1,1),
     UserId INT NOT NULL,
@@ -165,6 +198,17 @@ Create table Wishlist(
     FOREIGN KEY (UserId) REFERENCES UserRegister(UserId),
     FOREIGN KEY (BookId) REFERENCES Book(BookId)
 )
+
+ALTER TABLE Wishlist
+DROP COLUMN IsAvailable;
+
+alter table Wishlist add IsAvailable bit default 1
+
+UPDATE Wishlist
+SET IsAvailable = 1
+WHERE IsAvailable IS NULL;
+
+Select * from Wishlist
 
 alter procedure spAddWishlist(
 @UserId int,
@@ -213,7 +257,9 @@ Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 end
 
-Create table Cart(
+--------------------------------------------------------------------------------
+
+create table Cart(
     CartId INT PRIMARY KEY IDENTITY(1,1),
     UserId INT NOT NULL,
     BookId INT NOT NULL,
@@ -221,6 +267,17 @@ Create table Cart(
     FOREIGN KEY (BookId) REFERENCES Book(BookId),
 	Count INT NOT NULL
 )
+
+ALTER TABLE Cart
+DROP COLUMN IsAvailable;
+
+alter table Cart add IsAvailable bit default 1
+
+UPDATE Cart
+SET IsAvailable = 1
+WHERE IsAvailable IS NULL;
+
+Select * from Cart
 
 Alter procedure spAddCart(
 @UserId int,
@@ -286,11 +343,14 @@ Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 End
 
+------------------------------------------------------------------------------
 
 Create table Type(
 TypeId INT PRIMARY KEY IDENTITY(1,1),
 TypeName varchar(50)
 )
+
+---------------------------------------------------------------------------------
 
 Create table CustomerDetails(
 CustomerId INT PRIMARY KEY IDENTITY(1,1),
@@ -384,8 +444,7 @@ Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 End
 
-
-
+------------------------------------------------------------------------------------------------------
 
 Create table CustomerFeedback(
     FeedbackId INT PRIMARY KEY IDENTITY(1,1),
@@ -434,6 +493,8 @@ end
 
 Select * from CustomerFeedback
 
+----------------------------------------------------------------------------------
+
 Create table OrderPlaced(
     OrderId INT PRIMARY KEY IDENTITY(1,1),
     CustomerId INT NOT NULL,
@@ -442,38 +503,48 @@ Create table OrderPlaced(
     FOREIGN KEY (CartId) REFERENCES Cart(CartId)
 )
 
-create procedure spPlaceOrder(
+alter table OrderPlaced add UserId int 
+
+alter procedure spPlaceOrder(
 @CustomerId int,
-@CartId int
+@CartId int,
+@UserId int
 )
 as 
 begin
 Begin try
-insert into OrderPlaced (CustomerId,CartId)
-values (@CustomerId,@CartId)
+insert into OrderPlaced (CustomerId,CartId,UserId)
+values (@CustomerId,@CartId,@UserId)
 End try
 Begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 end;
 
+select * from OrderPlaced
+
+---------------------------------------------------------------------------------
+
 Create table OrderSummary(
 SummaryId INT PRIMARY KEY IDENTITY(1,1),
 OrderId INT NOT NULL
 )
 
-create procedure spOrderSummary
+alter procedure spOrderSummary
 (
-@UserId int
+@UserId int,
+@OrderId int
 )
 as
 begin
 begin try
+insert into OrderSummary(OrderId) values(@OrderId)
 	SELECT
 		 OS.SummaryId,
 		 OS.OrderId,
 		 OP.CustomerId,
 		 OP.CartId,
+		 OP.UserId,
 		 C.UserId,
 		 B.BookId,
 		 C.Count,
@@ -498,3 +569,8 @@ begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
 end catch
 end
+
+
+EXEC spOrderSummary @UserId=3, @OrderId=3;
+
+Select * from OrderSummary

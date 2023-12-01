@@ -27,7 +27,7 @@ namespace BookStoreRepository.Repository
             con = new SqlConnection(connectionStr);
         }
         Nlog nlog = new Nlog();
-        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId)
+        public IEnumerable<SummaryOrder> GetOrderSummary(int UserId, int OrderId)
         {
             try
             {
@@ -36,6 +36,7 @@ namespace BookStoreRepository.Repository
                 SqlCommand com = new SqlCommand("spOrderSummary", con);
                 com.CommandType = CommandType.StoredProcedure;
                 com.Parameters.AddWithValue("@UserId", UserId);
+                com.Parameters.AddWithValue("@OrderId", OrderId);
                 SqlDataAdapter da = new SqlDataAdapter(com);
                 DataTable dt = new DataTable();
                 con.Open();

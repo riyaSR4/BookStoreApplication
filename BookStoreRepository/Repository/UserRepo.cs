@@ -44,6 +44,7 @@ namespace BookStoreRepository.Repository
                 com.Parameters.AddWithValue("@EmailId", obj.EmailId);
                 com.Parameters.AddWithValue("@password", password);
                 com.Parameters.AddWithValue("@MobileNumber", obj.MobileNumber);
+                com.Parameters.AddWithValue("@IsAdmin", obj.IsAdmin);
                 con.Open();
                 int result = await com.ExecuteNonQueryAsync();
                 nlog.LogDebug("User Registered");
@@ -67,7 +68,7 @@ namespace BookStoreRepository.Repository
                 var decryptPassword = DecryptPassword(userregister.Password);
                 if (userregister != null && decryptPassword.Equals(password))
                 {
-                    var token = GenerateSecurityToken(userregister.EmailId, userregister.UserId);
+                    var token = GenerateSecurityToken(userregister.EmailId, userregister.UserId, userregister.IsAdmin);
                     return token;
                 }
                 nlog.LogDebug("User Logged In");
@@ -103,7 +104,8 @@ namespace BookStoreRepository.Repository
                         FullName = (string)reader["FullName"],
                         EmailId = (string)reader["EmailId"],
                         Password = (string)reader["Password"],
-                        MobileNumber = (string)reader["MobileNumber"]
+                        MobileNumber = (string)reader["MobileNumber"],
+                        IsAdmin = (bool)reader["IsAdmin"]
                     };
                 }
                 con.Close();
@@ -128,7 +130,7 @@ namespace BookStoreRepository.Repository
                 var emailcheck = GetUser(email);
                 if (emailcheck != null)
                 {
-                    var token = GenerateSecurityToken(emailcheck.EmailId, emailcheck.UserId);
+                    var token = GenerateSecurityToken(emailcheck.EmailId, emailcheck.UserId, emailcheck.IsAdmin);
                     MSMQ msmq = new MSMQ();
                     msmq.sendData2Queue(token, email);
                     nlog.LogDebug("Reset Email Send");
@@ -168,6 +170,7 @@ namespace BookStoreRepository.Repository
                         com.Parameters.AddWithValue("@EmailId", input.EmailId);
                         com.Parameters.AddWithValue("@password", password);
                         com.Parameters.AddWithValue("@MobileNumber", input.MobileNumber);
+                        com.Parameters.AddWithValue("@IsAdmin", input.IsAdmin);
                         con.Open();
                         int i = com.ExecuteNonQuery();
                         con.Close();
@@ -196,7 +199,7 @@ namespace BookStoreRepository.Repository
             }
         }
 
-        public string GenerateSecurityToken(string email, int userId)
+        public string GenerateSecurityToken(string email, int userId, bool role)
         {
             var tokenhandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(this.iconfiguration[("JWT:Key")]);
@@ -205,7 +208,8 @@ namespace BookStoreRepository.Repository
                 Subject = new ClaimsIdentity(new[]
                 {
                     new Claim(ClaimTypes.Email, email),
-                    new Claim("Id",userId.ToString())
+                    new Claim("Id",userId.ToString()),
+                    new Claim("Role",role?"Admin":"Normal")
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),

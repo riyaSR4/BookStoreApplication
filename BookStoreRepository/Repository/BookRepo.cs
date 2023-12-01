@@ -229,5 +229,50 @@ namespace BookStoreRepository.Repository
             }
         }
 
+        public IEnumerable<Books> GetBookById(int BookId)
+        {
+            try
+            {
+                Connection();
+                List<Books> BookList = new List<Books>();
+                SqlCommand com = new SqlCommand("spGetBookById", con);
+                com.CommandType = CommandType.StoredProcedure;
+                com.Parameters.AddWithValue("@BookId", BookId);
+                SqlDataAdapter da = new SqlDataAdapter(com);
+                DataTable dt = new DataTable();
+                con.Open();
+                da.Fill(dt);
+                con.Close();
+                //Bind EmpModel generic list using dataRow
+                foreach (DataRow dr in dt.Rows)
+                {
+                    BookList.Add(
+                        new Books()
+                        {
+                            BookId = Convert.ToInt32(dr["BookId"]),
+                            BookName = Convert.ToString(dr["BookName"]),
+                            BookDescription = Convert.ToString(dr["BookDescription"]),
+                            BookAuthor = Convert.ToString(dr["BookAuthor"]),
+                            BookImage = Convert.ToString(dr["BookImage"]),
+                            BookCount = Convert.ToInt32(dr["BookCount"]),
+                            BookPrice = Convert.ToInt32(dr["BookPrice"]),
+                            Rating = Convert.ToInt32(dr["Rating"])
+                        }
+                        );
+                }
+                nlog.LogDebug("Got the book by Id");
+                return BookList;
+            }
+            catch (Exception ex)
+            {
+                nlog.LogError(ex.Message);
+                throw new Exception(ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+
     }
 }
