@@ -20,6 +20,9 @@ namespace BookStoreCommon.Wishlist
         //[Required(ErrorMessage = "BookId is null")]
         public int BookId { get; set; }
 
+        [Required(ErrorMessage = "IsAvailable is null")]
+        public bool IsAvailable { get; set; }
+
         public virtual Books book  { get; set; }
         
     }

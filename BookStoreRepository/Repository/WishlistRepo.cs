@@ -115,6 +115,7 @@ namespace BookStoreRepository.Repository
                                 BookPrice = Convert.ToInt32(dr["BookPrice"]),
                                 Rating = Convert.ToInt32(dr["Rating"])
                             },
+                            IsAvailable = Convert.ToBoolean(dr["IsAvailable"])
                         }
                         );
                 }

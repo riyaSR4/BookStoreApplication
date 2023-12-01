@@ -105,7 +105,7 @@ namespace BookStoreRepository.Repository
                         EmailId = (string)reader["EmailId"],
                         Password = (string)reader["Password"],
                         MobileNumber = (string)reader["MobileNumber"],
-                        IsAdmin = (bool)reader["IsAdmin"]
+                        IsAdmin = (string)reader["IsAdmin"]
                     };
                 }
                 con.Close();
@@ -199,7 +199,7 @@ namespace BookStoreRepository.Repository
             }
         }
 
-        public string GenerateSecurityToken(string email, int userId, bool role)
+        public string GenerateSecurityToken(string email, int userId, string role)
         {
             var tokenhandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(this.iconfiguration[("JWT:Key")]);
@@ -209,7 +209,7 @@ namespace BookStoreRepository.Repository
                 {
                     new Claim(ClaimTypes.Email, email),
                     new Claim("Id",userId.ToString()),
-                    new Claim("Role",role?"Admin":"Normal")
+                    new Claim(ClaimTypes.Role,role)
                 }),
                 Expires = DateTime.UtcNow.AddMinutes(30),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key),

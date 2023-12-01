@@ -21,6 +21,9 @@ namespace BookStoreCommon.Cart
 
         [Required(ErrorMessage = "Count is null")]
         public int Count { get; set; }
+
+        [Required(ErrorMessage = "IsAvailable is null")]
+        public bool IsAvailable { get; set; }
         public virtual Books Book { get; set; }
     }
 }

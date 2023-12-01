@@ -8,16 +8,26 @@ Password varchar(20),
 MobileNumber varchar(20)
 );
 
-alter table UserRegister add IsAdmin bit default 1
+alter table UserRegister add IsAdmin varchar(max)
 
 UPDATE UserRegister
-SET IsAdmin = 1
-WHERE IsAdmin IS NULL;
+SET IsAdmin = 'Admin'
+WHERE UserId = 3;
+
+UPDATE UserRegister
+SET IsAdmin = 'User'
+WHERE UserId = 6;
 
 Select * from UserRegister
 
 DELETE FROM UserRegister
 WHERE UserId = 5;
+
+ALTER TABLE UserRegister
+DROP CONSTRAINT DF__UserRegis__IsAdm__503BEA1C;
+
+ALTER TABLE UserRegister
+DROP COLUMN IsAdmin;
 
 alter procedure spUserRegistration
 (
@@ -225,16 +235,19 @@ Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 end
 
-alter procedure spGetWishList
+alter procedure spGetAllWishList
 (
 	@UserId int
 )
 as begin
 Begin try
+if not exists (select 1 from Wishlist where UserId = @UserId and (IsAvailable = 0))
+begin
 	select * from 
 		Wishlist INNER JOIN
 		 Book on Book.BookId = Wishlist.BookId 
 		 where Wishlist.UserId = @UserId
+		 end
 End try
 Begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
@@ -295,16 +308,19 @@ Print 'An Error occured: ' + ERROR_MESSAGE();
 End Catch
 end
 
-alter procedure spGetCart
+alter procedure spGetAllCart
 (
 	@UserId int
 )
 as begin
 Begin try
+if not exists (select 1 from Cart where UserId = @UserId and (IsAvailable = 0))
+begin
 	select * from 
 		Cart INNER JOIN
 		 Book on Book.BookId = Cart.BookId 
 		 where Cart.UserId = @UserId
+		 end
 End try
 Begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
@@ -312,6 +328,8 @@ End Catch
 end
 
 EXEC sp_rename 'spGetCart', 'spGetAllCart';
+
+EXEC spGetAllCart @UserId=3;
 
 alter Procedure spDeleteCart
 (
@@ -514,7 +532,8 @@ as
 begin
 Begin try
 insert into OrderPlaced (CustomerId,CartId,UserId)
-values (@CustomerId,@CartId,@UserId)
+values (@CustomerId,@CartId,@UserId) 
+update Cart set IsAvailable = 0 where CartId = @CartId
 End try
 Begin catch
 Print 'An Error occured: ' + ERROR_MESSAGE();
